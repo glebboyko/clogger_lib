@@ -13,6 +13,12 @@ enum MessageType { Debug = 0, Info = 1, Warning = 2, Error = 3 };
 class Logger {
  public:
   Logger(const char* file_name, MessageType mode = Info);
+
+  Logger(const Logger&) = delete;
+  Logger(Logger&&) = delete;
+  Logger& operator=(const Logger&) = delete;
+  Logger& operator=(Logger&&) = delete;
+
   ~Logger();
 
   void LogMessage(const std::string& message, MessageType message_type);
@@ -31,5 +37,3 @@ class Logger {
 };
 
 }  // namespace LGR
-
-#include "source/logger-supply.hpp"
