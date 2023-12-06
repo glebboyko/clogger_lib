@@ -1,6 +1,6 @@
-#include "logger-standard.hpp"
-
 #include <chrono>
+
+#include "clogger-standard.hpp"
 
 namespace LGR {
 

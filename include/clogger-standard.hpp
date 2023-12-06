@@ -1,6 +1,6 @@
 #pragma once
 
-#include "logger.hpp"
+#include "clogger.hpp"
 
 namespace LGR {
 

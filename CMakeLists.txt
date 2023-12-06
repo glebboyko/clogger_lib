@@ -10,5 +10,5 @@ set(CLOGGER_DIR_INCLUDE ${CLOGGER_DIR_INCLUDE} PARENT_SCOPE)
 
 add_library(${PROJECT_NAME}
         STATIC
-        source/logger.cpp source/logger-standard.cpp)
+        source/clogger.cpp source/clogger-standard.cpp)
 add_library(clogger_lib ALIAS ${PROJECT_NAME})
