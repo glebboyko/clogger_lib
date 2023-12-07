@@ -20,7 +20,7 @@ Logger::~Logger() {
 }
 
 void Logger::LogMessage(const std::string& message, MessageType message_type) {
-  if (message_type < mode_) {
+  if (message_type > mode_) {
     return;
   }
 
