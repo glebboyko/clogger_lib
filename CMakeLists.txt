@@ -3,6 +3,8 @@ project(clogger)
 
 set(CMAKE_CXX_STANDARD 20)
 
+set(CMAKE_CXX_FLAGS -pthread)
+
 include_directories(include source)
 
 get_filename_component(CLOGGER_DIR_INCLUDE include ABSOLUTE DIRECTORY)
