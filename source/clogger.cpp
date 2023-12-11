@@ -13,7 +13,8 @@ Logger::Logger(const char* file_name, MessageType mode) : mode_(mode) {
 
 Logger::~Logger() {
   active_ = false;
-  output_lock_.unlock();
+  output_semaphore.try_acquire();
+  output_semaphore.release();
 
   output_thread_.join();
   file_.close();
@@ -25,12 +26,14 @@ void Logger::LogMessage(const std::string& message, MessageType message_type) {
   }
 
   output_list_.push_back(message);
-  output_lock_.unlock();
+
+  output_semaphore.try_acquire();
+  output_semaphore.release();
 }
 
 void Logger::LogWriter() {
   while (true) {
-    output_lock_.lock();
+    output_semaphore.acquire();
 
     while (!output_list_.empty()) {
       file_ << output_list_.front();
