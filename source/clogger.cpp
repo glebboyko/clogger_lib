@@ -39,6 +39,7 @@ void Logger::LogWriter() {
       file_ << output_list_.front();
       output_list_.pop_front();
     }
+    file_.flush();
     if (!active_) {
       return;
     }
