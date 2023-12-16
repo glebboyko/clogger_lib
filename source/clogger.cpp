@@ -2,7 +2,7 @@
 
 namespace LGR {
 
-Logger::Logger(const char* file_name, MessageType mode) : mode_(mode) {
+Logger::Logger(const char* file_name, int mode) : mode_(mode) {
   try {
     file_.open(file_name, std::ios::app);
   } catch (std::ofstream::failure& exception) {
@@ -20,7 +20,7 @@ Logger::~Logger() {
   file_.close();
 }
 
-void Logger::LogMessage(const std::string& message, MessageType message_type) {
+void Logger::LogMessage(const std::string& message, int message_type) {
   if (message_type > mode_) {
     return;
   }

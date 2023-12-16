@@ -16,7 +16,7 @@ std::string GetCurrTime() {
   return buffer;
 }
 
-std::string MessageTypeToStr(MessageType type) {
+std::string MessageTypeToStr(int type) {
   switch (type) {
     case Debug:
       return "DEBUG";
@@ -33,7 +33,7 @@ std::string MessageTypeToStr(MessageType type) {
 
 std::string LogFormatter(const std::string& l_module,
                          const std::string& l_action,
-                         const std::string& l_event, MessageType type) {
+                         const std::string& l_event, int type) {
   std::string log = GetCurrTime() + ": " + MessageTypeToStr(type) + "\n";
   log += "\tfrom " + l_module;
   log += " in " + l_action + ":\n";
@@ -43,7 +43,7 @@ std::string LogFormatter(const std::string& l_module,
 }
 
 void Log(const std::string& l_module, const std::string& l_action,
-         const std::string& l_event, MessageType type, Logger& logger) {
+         const std::string& l_event, int type, Logger& logger) {
   logger.LogMessage(LogFormatter(l_module, l_action, l_event, type), type);
 }
 

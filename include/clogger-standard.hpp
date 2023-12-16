@@ -5,7 +5,7 @@
 namespace LGR {
 
 void Log(const std::string& l_module, const std::string& l_action,
-         const std::string& l_event, MessageType type,
+         const std::string& l_event, int type,
          Logger& logger);
 
 }  // namespace LGR
