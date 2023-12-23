@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <list>
+#include <mutex>
 #include <semaphore>
 #include <string>
 #include <thread>
@@ -29,7 +30,8 @@ class Logger {
   std::list<std::string> output_list_;
   std::ofstream file_;
   std::thread output_thread_;
-  std::binary_semaphore output_semaphore{0};
+  std::binary_semaphore output_semaphore_{0};
+  std::mutex buffer_mutex_;
 
   bool active_ = true;
 

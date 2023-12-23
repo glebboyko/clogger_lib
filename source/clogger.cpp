@@ -13,8 +13,8 @@ Logger::Logger(const char* file_name, int mode) : mode_(mode) {
 
 Logger::~Logger() {
   active_ = false;
-  output_semaphore.try_acquire();
-  output_semaphore.release();
+  output_semaphore_.try_acquire();
+  output_semaphore_.release();
 
   output_thread_.join();
   file_.close();
@@ -25,19 +25,24 @@ void Logger::LogMessage(const std::string& message, int message_type) {
     return;
   }
 
+  buffer_mutex_.lock();
   output_list_.push_back(message);
 
-  output_semaphore.try_acquire();
-  output_semaphore.release();
+  output_semaphore_.try_acquire();
+  output_semaphore_.release();
+  buffer_mutex_.unlock();
 }
 
 void Logger::LogWriter() {
   while (true) {
-    output_semaphore.acquire();
+    output_semaphore_.acquire();
 
     while (!output_list_.empty()) {
-      file_ << output_list_.front();
+      buffer_mutex_.lock();
+      std::string message = output_list_.front();
       output_list_.pop_front();
+      buffer_mutex_.unlock();
+      file_ << message;
     }
     file_.flush();
     if (!active_) {
