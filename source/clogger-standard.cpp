@@ -6,13 +6,17 @@ namespace LGR {
 
 std::string GetCurrTime() {
   using SystemClock = std::chrono::system_clock;
-  auto curr_time = SystemClock::to_time_t(SystemClock::now());
+  auto now = SystemClock::now();
+  auto curr_time = SystemClock::to_time_t(now);
 
   const int kTimeSize = 26;
   std::string buffer;
   buffer.resize(kTimeSize);
   ctime_r(&curr_time, buffer.data());
   buffer.resize(kTimeSize - 2);
+
+  int precision = (now - SystemClock::from_time_t(curr_time)).count();
+  buffer += " " + std::to_string(precision);
   return buffer;
 }
 
