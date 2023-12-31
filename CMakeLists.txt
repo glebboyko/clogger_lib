@@ -7,10 +7,8 @@ set(CMAKE_CXX_FLAGS -pthread)
 
 include_directories(include source)
 
-get_filename_component(CLOGGER_DIR_INCLUDE include ABSOLUTE DIRECTORY)
-set(${PROJECT_NAME}_DIR ${CLOGGER_DIR_INCLUDE} PARENT_SCOPE)
-
 add_library(${PROJECT_NAME}
         STATIC
         source/clogger.cpp source/clogger-standard.cpp)
-add_library(${PROJECT_NAME}_lib ALIAS ${PROJECT_NAME})
+
+set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "lib_")
