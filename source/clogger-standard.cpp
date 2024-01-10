@@ -1,6 +1,6 @@
-#include <chrono>
-
 #include "clogger-standard.hpp"
+
+#include <chrono>
 
 namespace LGR {
 
@@ -35,9 +35,8 @@ std::string MessageTypeToStr(int type) {
   }
 }
 
-std::string LogFormatter(const std::string& l_module,
-                         const std::string& l_action,
-                         const std::string& l_event, int type) {
+std::string GetRawLog(const std::string& l_module, const std::string& l_action,
+                      const std::string& l_event, int type) {
   std::string log = GetCurrTime() + ": " + MessageTypeToStr(type) + "\n";
   log += "\tfrom " + l_module;
   log += " in " + l_action + ":\n";
@@ -48,7 +47,7 @@ std::string LogFormatter(const std::string& l_module,
 
 void Log(const std::string& l_module, const std::string& l_action,
          const std::string& l_event, int type, Logger& logger) {
-  logger.LogMessage(LogFormatter(l_module, l_action, l_event, type), type);
+  logger.LogMessage(GetRawLog(l_module, l_action, l_event, type), type);
 }
 
 }  // namespace LGR
