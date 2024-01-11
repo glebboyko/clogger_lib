@@ -40,7 +40,7 @@ std::string GetRawLog(const std::string& l_module, const std::string& l_action,
   std::string log = GetCurrTime() + ": " + MessageTypeToStr(type) + "\n";
   log += "\tfrom " + l_module;
   log += " in " + l_action + ":\n";
-  log += "\t\t--- " + l_event + " ---\n\n";
+  log += "\t\t--- " + l_event + " ---\n";
 
   return log;
 }

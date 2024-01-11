@@ -13,7 +13,7 @@ enum MessageType { Debug = 3, Info = 2, Warning = 1, Error = 0 };
 
 class Logger {
  public:
-  Logger(const char* file_name, int mode = Info);
+  Logger(const char* file_name, int mode = Info, unsigned max_queue = 1'000);
 
   Logger(const Logger&) = delete;
   Logger(Logger&&) = delete;
@@ -26,6 +26,7 @@ class Logger {
 
  private:
   int mode_;
+  unsigned max_queue_;
 
   std::list<std::string> output_list_;
   std::ofstream file_;
