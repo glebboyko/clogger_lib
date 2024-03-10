@@ -56,10 +56,11 @@ void Log(const std::string& l_module, const std::string& l_action,
 }
 
 /*---------------------------- base logger class -----------------------------*/
-BaseLogger::BaseLogger(LGR::Logger& logger, LGR::BaseLogger::LogFoo log_foo,
-                       MessageTypeTranslator type_translator)
+StandardBaseLogger::StandardBaseLogger(LGR::Logger& logger,
+                                       LGR::StandardBaseLogger::LogFoo log_foo,
+                                       MessageTypeTranslator type_translator)
     : logger_(logger), log_foo_(log_foo), type_translator_(type_translator) {}
-void BaseLogger::Log(const std::string& event, int priority) {
+void StandardBaseLogger::Log(const std::string& event, int priority) {
   log_foo_(GetModule(), GetAction(), event, priority, logger_,
            type_translator_);
 }
