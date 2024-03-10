@@ -4,6 +4,7 @@
 
 namespace LGR {
 
+/*---------------------------------- supply ----------------------------------*/
 std::string GetCurrTime() {
   using SystemClock = std::chrono::system_clock;
   auto now = SystemClock::now();
@@ -35,9 +36,11 @@ std::string MessageTypeToStr(int type) {
   }
 }
 
+/*------------------------------ log functions -------------------------------*/
 std::string GetRawLog(const std::string& l_module, const std::string& l_action,
-                      const std::string& l_event, int type) {
-  std::string log = GetCurrTime() + ": " + MessageTypeToStr(type) + "\n";
+                      const std::string& l_event, int type,
+                      MessageTypeTranslator type_translator) {
+  std::string log = GetCurrTime() + ": " + type_translator(type) + "\n";
   log += "\tfrom " + l_module;
   log += " in " + l_action + ":\n";
   log += "\t\t--- " + l_event + " ---\n";
@@ -46,8 +49,19 @@ std::string GetRawLog(const std::string& l_module, const std::string& l_action,
 }
 
 void Log(const std::string& l_module, const std::string& l_action,
-         const std::string& l_event, int type, Logger& logger) {
-  logger.LogMessage(GetRawLog(l_module, l_action, l_event, type), type);
+         const std::string& l_event, int type, Logger& logger,
+         MessageTypeTranslator type_translator) {
+  logger.LogMessage(
+      GetRawLog(l_module, l_action, l_event, type, type_translator), type);
+}
+
+/*---------------------------- base logger class -----------------------------*/
+BaseLogger::BaseLogger(LGR::Logger& logger, LGR::BaseLogger::LogFoo log_foo,
+                       MessageTypeTranslator type_translator)
+    : logger_(logger), log_foo_(log_foo), type_translator_(type_translator) {}
+void BaseLogger::Log(const std::string& event, int priority) {
+  log_foo_(GetModule(), GetAction(), event, priority, logger_,
+           type_translator_);
 }
 
 }  // namespace LGR
