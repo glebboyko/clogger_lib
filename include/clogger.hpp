@@ -13,8 +13,8 @@ enum MessageType { Debug = 3, Info = 2, Warning = 1, Error = 0 };
 
 class Logger {
  public:
-  Logger(const char* file_name, int mode = Info, size_t max_queue = SIZE_T_MAX);
-  Logger(std::ostream& output, int mode = Info, size_t max_queue = SIZE_T_MAX);
+  Logger(const char* file_name, int mode = Info, size_t max_queue = SIZE_MAX);
+  Logger(std::ostream& output, int mode = Info, size_t max_queue = SIZE_MAX);
 
   Logger(const Logger&) = delete;
   Logger(Logger&&) = delete;
