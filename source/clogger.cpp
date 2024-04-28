@@ -4,13 +4,19 @@
 
 namespace LGR {
 
-Logger::Logger(const char* file_name, int mode, unsigned max_queue)
-    : mode_(mode), max_queue_(max_queue) {
+Logger::Logger(const char* file_name, int mode, size_t max_queue)
+    : mode_(mode), max_queue_(max_queue), output_(file_) {
   try {
     file_.open(file_name, std::ios::app);
   } catch (std::ofstream::failure& exception) {
     file_.open(file_name, std::ios::out);
   }
+  output_thread_ = std::thread(&Logger::LogWriter, this);
+}
+Logger::Logger(std::ostream& output, int mode, size_t max_queue)
+    : mode_(mode),
+      max_queue_(max_queue),
+      output_(output) {
   output_thread_ = std::thread(&Logger::LogWriter, this);
 }
 
@@ -20,7 +26,6 @@ Logger::~Logger() {
   output_semaphore_.release();
 
   output_thread_.join();
-  file_.close();
 }
 
 void Logger::LogMessage(const std::string& message, int message_type) {
@@ -57,9 +62,9 @@ void Logger::LogWriter() {
       if (!contiguous) {
         buffer_mutex_.unlock();
       }
-      file_ << message << "\n";
+      output_ << message << "\n";
     }
-    file_.flush();
+    output_.flush();
 
     if (contiguous) {
       buffer_mutex_.unlock();

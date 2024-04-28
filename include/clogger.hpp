@@ -13,7 +13,8 @@ enum MessageType { Debug = 3, Info = 2, Warning = 1, Error = 0 };
 
 class Logger {
  public:
-  Logger(const char* file_name, int mode = Info, unsigned max_queue = 1'000);
+  Logger(const char* file_name, int mode = Info, size_t max_queue = SIZE_T_MAX);
+  Logger(std::ostream& output, int mode = Info, size_t max_queue = SIZE_T_MAX);
 
   Logger(const Logger&) = delete;
   Logger(Logger&&) = delete;
@@ -26,13 +27,15 @@ class Logger {
 
  private:
   int mode_;
-  unsigned max_queue_;
+  size_t max_queue_;
 
   std::list<std::string> output_list_;
   std::ofstream file_;
   std::thread output_thread_;
   std::binary_semaphore output_semaphore_{0};
   std::mutex buffer_mutex_;
+
+  std::ostream& output_;
 
   bool active_ = true;
 
