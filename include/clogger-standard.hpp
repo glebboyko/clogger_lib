@@ -34,20 +34,14 @@ class StandardBaseLogger {
   void Log(const std::string& event, int priority);
 
  protected:
-  using LogFoo = std::function<void(const std::string&, const std::string&,
-                                    const std::string&, int, Logger&, LogParser,
-                                    MessageTypeTranslator)>;
-
-  StandardBaseLogger(Logger& logger, LogFoo log_foo = ::LGR::Log,
-                     LogParser log_parser = GetRawLog,
+  StandardBaseLogger(Logger& logger, LogParser log_parser = GetRawLog,
                      MessageTypeTranslator type_translator = MessageTypeToStr);
 
-  virtual std::string GetModule() const = 0;
+  virtual std::string GetModule() const;
   virtual std::string GetAction() const;
 
  private:
   Logger& logger_;
-  LogFoo log_foo_;
   LogParser log_parser_;
   MessageTypeTranslator type_translator_;
 };

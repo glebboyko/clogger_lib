@@ -52,13 +52,15 @@ std::string GetRawLineLog(const std::string& l_module,
                           const std::string& l_action,
                           const std::string& l_event, int type,
                           MessageTypeTranslator type_translator) {
-  std::string log = GetCurrTime() + " " + type_translator(type) + "\t-> " +
-                    l_module + "\t-> ";
+  std::string log = GetCurrTime() + "\t: " + type_translator(type) + "\t:  ";
+  if (!l_module.empty()) {
+    log += l_module + "\t-> ";
+  }
   if (!l_action.empty()) {
     log += l_action + "\t-> ";
   }
 
-  log += l_event + "\n";
+  log += l_event;
 
   return log;
 }
@@ -71,17 +73,17 @@ void Log(const std::string& l_module, const std::string& l_action,
 }
 /*---------------------------- base logger class -----------------------------*/
 StandardBaseLogger::StandardBaseLogger(LGR::Logger& logger,
-                                       LGR::StandardBaseLogger::LogFoo log_foo,
                                        LogParser log_parser,
                                        MessageTypeTranslator type_translator)
     : logger_(logger),
-      log_foo_(log_foo),
       log_parser_(log_parser),
       type_translator_(type_translator) {}
 void StandardBaseLogger::Log(const std::string& event, int priority) {
-  log_foo_(GetModule(), GetAction(), event, priority, logger_, log_parser_,
-           type_translator_);
+  ::LGR::Log(GetModule(), GetAction(), event, priority, logger_, log_parser_,
+             type_translator_);
 }
+
+std::string StandardBaseLogger::GetModule() const { return ""; }
 std::string StandardBaseLogger::GetAction() const { return ""; }
 
 }  // namespace LGR
