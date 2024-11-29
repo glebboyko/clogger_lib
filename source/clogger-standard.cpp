@@ -39,20 +39,20 @@ std::string MessageTypeToStr(int type) {
 }
 
 StandardLogger::StandardLogger(const std::string& name, LGR::MessageType mode,
-                               char delimiter)
-    : StandardLogger(name, std::cerr, mode, delimiter) {}
+                               bool async, char delimiter)
+    : StandardLogger(name, std::cerr, mode, async, delimiter) {}
 
 StandardLogger::StandardLogger(const std::string& name, std::ostream& output,
-                               LGR::MessageType mode, char delimiter,
-                               size_t max_queue)
-    : LGR::Logger(output, mode, max_queue),
+                               LGR::MessageType mode, bool async,
+                               char delimiter, size_t max_queue)
+    : LGR::Logger(output, mode, async, max_queue),
       name_(name),
       delimiter_(delimiter) {}
 
 StandardLogger::StandardLogger(const std::string& name, const char* file_name,
-                               LGR::MessageType mode, char delimiter,
-                               size_t max_queue)
-    : LGR::Logger(file_name, mode, max_queue),
+                               LGR::MessageType mode, bool async,
+                               char delimiter, size_t max_queue)
+    : LGR::Logger(file_name, mode, async, max_queue),
       name_(name),
       delimiter_(delimiter) {}
 
@@ -71,7 +71,7 @@ StandardLogger StandardLogger::GetChild(const std::string& suffix,
 
   if (add_index) {
     auto iter = child_indexes_.find(child.name_);
-    if (iter !=  child_indexes_.end()) {
+    if (iter != child_indexes_.end()) {
       iter->second += 1;
       child.name_ += std::to_string(iter->second);
     } else {

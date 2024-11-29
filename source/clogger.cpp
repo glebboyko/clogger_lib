@@ -4,36 +4,47 @@
 
 namespace LGR {
 
-Logger::Writer::Writer(const char* file_name, size_t max_queue)
-    : max_queue_(max_queue), output_(file_) {
+Logger::Writer::Writer(const char* file_name, bool async, size_t max_queue)
+    : async_(async), max_queue_(max_queue), output_(file_) {
   try {
     file_.open(file_name, std::ios::app);
   } catch (std::ofstream::failure& exception) {
     file_.open(file_name, std::ios::out);
   }
-  worker_thread_ = std::thread(&Writer::Worker, this);
+
+  if (async_) {
+    worker_thread_ = std::thread(&Writer::Worker, this);
+  }
 }
 
-Logger::Writer::Writer(std::ostream& output, size_t max_queue)
-    : max_queue_(max_queue), output_(output) {
-  worker_thread_ = std::thread(&Writer::Worker, this);
+Logger::Writer::Writer(std::ostream& output, bool async, size_t max_queue)
+    : async_(async), max_queue_(max_queue), output_(output) {
+  if (async_) {
+    worker_thread_ = std::thread(&Writer::Worker, this);
+  }
 }
 
 Logger::Writer::~Writer() {
-  active_ = false;
-  output_semaphore_.try_acquire();
-  output_semaphore_.release();
+  if (async_) {
+    active_ = false;
+    output_semaphore_.try_acquire();
+    output_semaphore_.release();
 
-  worker_thread_.join();
+    worker_thread_.join();
+  }
 }
 
 void Logger::Writer::Write(const std::string& message) {
-  buffer_mutex_.lock();
-  output_list_.push_back(message);
+  if (async_) {
+    buffer_mutex_.lock();
+    output_list_.push_back(message);
 
-  output_semaphore_.try_acquire();
-  output_semaphore_.release();
-  buffer_mutex_.unlock();
+    output_semaphore_.try_acquire();
+    output_semaphore_.release();
+    buffer_mutex_.unlock();
+  } else {
+    output_ << message << "\n";
+  }
 }
 
 void Logger::Writer::Worker() {
@@ -70,11 +81,13 @@ void Logger::Writer::Worker() {
   }
 }
 
-Logger::Logger(const char* file_name, int mode, size_t max_queue)
-    : mode_(mode), writer_(std::make_shared<Writer>(file_name, max_queue)) {}
+Logger::Logger(const char* file_name, int mode, bool async, size_t max_queue)
+    : mode_(mode),
+      writer_(std::make_shared<Writer>(file_name, async, max_queue)) {}
 
-Logger::Logger(std::ostream& output, int mode, size_t max_queue)
-    : mode_(mode), writer_(std::make_shared<Writer>(output, max_queue)) {}
+Logger::Logger(std::ostream& output, int mode, bool async, size_t max_queue)
+    : mode_(mode),
+      writer_(std::make_shared<Writer>(output, async, max_queue)) {}
 
 void Logger::Log(const std::string& message, int message_type) {
   if (message_type < mode_) {

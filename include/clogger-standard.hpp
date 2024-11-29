@@ -10,13 +10,13 @@ namespace LGR {
 class StandardLogger : protected LGR::Logger {
  public:
   StandardLogger(const std::string& name, MessageType mode = MessageType::Info,
-                 char delimiter = '-');
+                 bool async = true, char delimiter = '-');
   StandardLogger(const std::string& name, const char* file_name,
-                 MessageType mode = MessageType::Info, char delimiter = '-',
-                 size_t max_queue = SIZE_T_MAX);
+                 MessageType mode = MessageType::Info, bool async = true,
+                 char delimiter = '-', size_t max_queue = SIZE_T_MAX);
   StandardLogger(const std::string& name, std::ostream& output,
-                 MessageType mode = MessageType::Info, char delimiter = '-',
-                 size_t max_queue = SIZE_T_MAX);
+                 MessageType mode = MessageType::Info, bool async = true,
+                 char delimiter = '-', size_t max_queue = SIZE_T_MAX);
 
   StandardLogger(const StandardLogger&) = default;
   StandardLogger(StandardLogger&&) = default;

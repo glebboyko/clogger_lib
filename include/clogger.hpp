@@ -20,8 +20,10 @@ enum MessageType {
 
 class Logger {
  public:
-  Logger(const char* file_name, int mode = Info, size_t max_queue = SIZE_T_MAX);
-  Logger(std::ostream& output, int mode = Info, size_t max_queue = SIZE_T_MAX);
+  Logger(const char* file_name, int mode = Info, bool async = true,
+         size_t max_queue = SIZE_T_MAX);
+  Logger(std::ostream& output, int mode = Info, bool async = true,
+         size_t max_queue = SIZE_T_MAX);
 
   Logger(const Logger&) = default;
   Logger(Logger&&) = default;
@@ -33,10 +35,11 @@ class Logger {
   virtual void Log(const std::string& message, int message_type);
 
  private:
+
   class Writer {
    public:
-    Writer(const char* file_name, size_t max_queue);
-    Writer(std::ostream& output, size_t max_queue);
+    Writer(const char* file_name, bool async, size_t max_queue);
+    Writer(std::ostream& output, bool async, size_t max_queue);
 
     Writer(const Writer&) = delete;
     Writer(Writer&&) = delete;
@@ -49,6 +52,7 @@ class Logger {
 
    private:
     std::list<std::string> output_list_;
+    bool async_;
     size_t max_queue_;
 
     std::ofstream file_;
