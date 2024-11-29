@@ -57,8 +57,6 @@ void Logger::Writer::Worker() {
       if (!contiguous) {
         buffer_mutex_.lock();
         if (output_list_.size() > max_queue_) {
-          output_list_.push_front(GetRawLineLog(
-              "LOGGER", "LOG WRITER", "Max logger queue reached", Warning));
           contiguous = true;
         }
       }
