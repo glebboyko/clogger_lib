@@ -35,7 +35,6 @@ class Logger {
   virtual void Log(const std::string& message, int message_type);
 
  private:
-
   class Writer {
    public:
     Writer(const char* file_name, bool async, size_t max_queue);
