@@ -4,8 +4,8 @@
 
 namespace LGR {
 
-Logger::Logger(const char* file_name, int mode, bool async, size_t max_queue)
-    : mode_(mode), async_(async), max_queue_(max_queue), output_(file_) {
+Logger::Writer::Writer(const char* file_name, bool async, size_t max_queue)
+    : async_(async), max_queue_(max_queue), output_(file_) {
   try {
     file_.open(file_name, std::ios::app);
   } catch (std::ofstream::failure& exception) {
@@ -13,31 +13,28 @@ Logger::Logger(const char* file_name, int mode, bool async, size_t max_queue)
   }
 
   if (async_) {
-    output_thread_ = std::thread(&Logger::LogWriter, this);
-  }
-}
-Logger::Logger(std::ostream& output, int mode, bool async, size_t max_queue)
-    : mode_(mode), async_(async), max_queue_(max_queue), output_(output) {
-  if (async_) {
-    output_thread_ = std::thread(&Logger::LogWriter, this);
+    worker_thread_ = std::thread(&Writer::Worker, this);
   }
 }
 
-Logger::~Logger() {
+Logger::Writer::Writer(std::ostream& output, bool async, size_t max_queue)
+    : async_(async), max_queue_(max_queue), output_(output) {
+  if (async_) {
+    worker_thread_ = std::thread(&Writer::Worker, this);
+  }
+}
+
+Logger::Writer::~Writer() {
   if (async_) {
     active_ = false;
     output_semaphore_.try_acquire();
     output_semaphore_.release();
 
-    output_thread_.join();
+    worker_thread_.join();
   }
 }
 
-void Logger::LogMessage(const std::string& message, int message_type) {
-  if (message_type > mode_) {
-    return;
-  }
-
+void Logger::Writer::Write(const std::string& message) {
   if (async_) {
     buffer_mutex_.lock();
     output_list_.push_back(message);
@@ -47,11 +44,10 @@ void Logger::LogMessage(const std::string& message, int message_type) {
     buffer_mutex_.unlock();
   } else {
     output_ << message << "\n";
-    output_.flush();
   }
 }
 
-void Logger::LogWriter() {
+void Logger::Writer::Worker() {
   while (true) {
     output_semaphore_.acquire();
 
@@ -85,6 +81,22 @@ void Logger::LogWriter() {
       return;
     }
   }
+}
+
+Logger::Logger(const char* file_name, int mode, bool async, size_t max_queue)
+    : mode_(mode),
+      writer_(std::make_shared<Writer>(file_name, async, max_queue)) {}
+
+Logger::Logger(std::ostream& output, int mode, bool async, size_t max_queue)
+    : mode_(mode),
+      writer_(std::make_shared<Writer>(output, async, max_queue)) {}
+
+void Logger::Log(const std::string& message, int message_type) {
+  if (message_type < mode_) {
+    return;
+  }
+
+  writer_->Write(message);
 }
 
 }  // namespace LGR

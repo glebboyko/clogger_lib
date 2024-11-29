@@ -1,49 +1,48 @@
 #pragma once
 
-#include <functional>
+#include <map>
+#include <memory>
 
 #include "clogger.hpp"
 
 namespace LGR {
 
-// supply
-using MessageTypeTranslator = std::function<std::string(int)>;
-using LogParser =
-    std::function<std::string(const std::string&, const std::string&,
-                              const std::string&, int, MessageTypeTranslator)>;
-
-std::string MessageTypeToStr(int type);
-
-// log functions
-std::string GetRawLog(const std::string& l_module, const std::string& l_action,
-                      const std::string& l_event, int type,
-                      MessageTypeTranslator type_translator = MessageTypeToStr);
-std::string GetRawLineLog(
-    const std::string& l_module, const std::string& l_action,
-    const std::string& l_event, int type,
-    MessageTypeTranslator type_translator = MessageTypeToStr);
-
-void Log(const std::string& l_module, const std::string& l_action,
-         const std::string& l_event, int type, Logger& logger,
-         LogParser log_parser = GetRawLog,
-         MessageTypeTranslator type_translator = MessageTypeToStr);
-
-// base logger class
-class StandardBaseLogger {
+class StandardLogger : protected LGR::Logger {
  public:
-  void Log(const std::string& event, int priority);
+  StandardLogger(const std::string& name, MessageType mode = MessageType::Info,
+                 bool async = true, char delimiter = '-');
+  StandardLogger(const std::string& name, const char* file_name,
+                 MessageType mode = MessageType::Info, bool async = true,
+                 char delimiter = '-', size_t max_queue = SIZE_T_MAX);
+  StandardLogger(const std::string& name, std::ostream& output,
+                 MessageType mode = MessageType::Info, bool async = true,
+                 char delimiter = '-', size_t max_queue = SIZE_T_MAX);
+
+  StandardLogger(const StandardLogger&) = default;
+  StandardLogger(StandardLogger&&) = default;
+  StandardLogger& operator=(const StandardLogger&) = default;
+  StandardLogger& operator=(StandardLogger&&) = default;
+
+  ~StandardLogger() = default;
+
+  virtual void Debug(const std::string& msg);
+  virtual void Info(const std::string& msg);
+  virtual void Warning(const std::string& msg);
+  virtual void Error(const std::string& msg);
+  virtual void Critical(const std::string& msg);
+
+  virtual void Log(const std::string& msg, MessageType priority);
+
+  virtual StandardLogger GetChild(const std::string& suffix,
+                                  bool add_index = false) const;
+  virtual StandardLogger GetChild(const std::string& suffix, MessageType mode,
+                                  bool add_index = false) const;
 
  protected:
-  StandardBaseLogger(Logger& logger, LogParser log_parser = GetRawLog,
-                     MessageTypeTranslator type_translator = MessageTypeToStr);
+  std::string name_;
+  char delimiter_;
 
-  virtual std::string GetModule() const;
-  virtual std::string GetAction() const;
-
- private:
-  Logger& logger_;
-  LogParser log_parser_;
-  MessageTypeTranslator type_translator_;
+  mutable std::map<std::string, size_t> child_indexes_;
 };
 
 }  // namespace LGR
