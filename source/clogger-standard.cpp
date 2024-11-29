@@ -1,10 +1,10 @@
 #include "clogger-standard.hpp"
 
 #include <chrono>
+#include <iostream>
 
 namespace LGR {
 
-/*---------------------------------- supply ----------------------------------*/
 std::string GetCurrTime() {
   using SystemClock = std::chrono::system_clock;
   auto now = SystemClock::now();
@@ -24,64 +24,85 @@ std::string GetCurrTime() {
 std::string MessageTypeToStr(int type) {
   switch (type) {
     case Debug:
-      return "DEBUG";
+      return "   DEBUG";
     case Info:
-      return "INFO";
+      return "    INFO";
     case Warning:
-      return "WARNING";
+      return " WARNING";
     case Error:
-      return "ERROR";
+      return "   ERROR";
+    case Critical:
+      return "CRITICAL";
     default:
-      return "CANNOT RECOGNIZE TYPE";
+      return " UNKNOWN";
   }
 }
 
-/*------------------------------ log functions -------------------------------*/
-std::string GetRawLog(const std::string& l_module, const std::string& l_action,
-                      const std::string& l_event, int type,
-                      MessageTypeTranslator type_translator) {
-  std::string log = GetCurrTime() + ": " + type_translator(type) + "\n";
-  log += "\tfrom " + l_module;
-  log += " in " + l_action + ":\n";
-  log += "\t\t--- " + l_event + " ---\n";
+StandardLogger::StandardLogger(const std::string& name, LGR::MessageType mode,
+                               char delimiter)
+    : StandardLogger(name, std::cerr, mode, delimiter) {}
 
-  return log;
+StandardLogger::StandardLogger(const std::string& name, std::ostream& output,
+                               LGR::MessageType mode, char delimiter,
+                               size_t max_queue)
+    : LGR::Logger(output, mode, max_queue),
+      name_(name),
+      delimiter_(delimiter) {}
+
+StandardLogger::StandardLogger(const std::string& name, const char* file_name,
+                               LGR::MessageType mode, char delimiter,
+                               size_t max_queue)
+    : LGR::Logger(file_name, mode, max_queue),
+      name_(name),
+      delimiter_(delimiter) {}
+
+StandardLogger StandardLogger::GetChild(const std::string& suffix,
+                                        bool add_index) const {
+  return GetChild(suffix, static_cast<MessageType>(mode_), add_index);
 }
 
-std::string GetRawLineLog(const std::string& l_module,
-                          const std::string& l_action,
-                          const std::string& l_event, int type,
-                          MessageTypeTranslator type_translator) {
-  std::string log = GetCurrTime() + " " + type_translator(type) + "\t-> " +
-                    l_module + "\t-> ";
-  if (!l_action.empty()) {
-    log += l_action + "\t-> ";
+StandardLogger StandardLogger::GetChild(const std::string& suffix,
+                                        LGR::MessageType mode,
+                                        bool add_index) const {
+  StandardLogger child = *this;
+  child.name_ = name_ + delimiter_ + suffix;
+  child.mode_ = mode;
+  child.child_indexes_.clear();
+
+  if (add_index) {
+    auto iter = child_indexes_.find(child.name_);
+    if (iter !=  child_indexes_.end()) {
+      iter->second += 1;
+      child.name_ += std::to_string(iter->second);
+    } else {
+      child_indexes_.insert({child.name_, 1});
+      child.name_ += '1';
+    }
   }
 
-  log += l_event + "\n";
-
-  return log;
+  return child;
 }
 
-void Log(const std::string& l_module, const std::string& l_action,
-         const std::string& l_event, int type, Logger& logger,
-         LogParser log_parser, MessageTypeTranslator type_translator) {
-  logger.LogMessage(
-      log_parser(l_module, l_action, l_event, type, type_translator), type);
+void StandardLogger::Debug(const std::string& msg) {
+  Log(msg, MessageType::Debug);
 }
-/*---------------------------- base logger class -----------------------------*/
-StandardBaseLogger::StandardBaseLogger(LGR::Logger& logger,
-                                       LGR::StandardBaseLogger::LogFoo log_foo,
-                                       LogParser log_parser,
-                                       MessageTypeTranslator type_translator)
-    : logger_(logger),
-      log_foo_(log_foo),
-      log_parser_(log_parser),
-      type_translator_(type_translator) {}
-void StandardBaseLogger::Log(const std::string& event, int priority) {
-  log_foo_(GetModule(), GetAction(), event, priority, logger_, log_parser_,
-           type_translator_);
+void StandardLogger::Info(const std::string& msg) {
+  Log(msg, MessageType::Info);
 }
-std::string StandardBaseLogger::GetAction() const { return ""; }
+void StandardLogger::Warning(const std::string& msg) {
+  Log(msg, MessageType::Warning);
+}
+void StandardLogger::Error(const std::string& msg) {
+  Log(msg, MessageType::Error);
+}
+void StandardLogger::Critical(const std::string& msg) {
+  Log(msg, MessageType::Critical);
+}
+
+void StandardLogger::Log(const std::string& msg, LGR::MessageType priority) {
+  Logger::Log(GetCurrTime() + '\t' + MessageTypeToStr(priority) + '\t' + name_ +
+                  " :\t" + msg,
+              priority);
+}
 
 }  // namespace LGR

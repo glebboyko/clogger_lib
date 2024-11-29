@@ -4,35 +4,30 @@
 
 namespace LGR {
 
-Logger::Logger(const char* file_name, int mode, size_t max_queue)
-    : mode_(mode), max_queue_(max_queue), output_(file_) {
+Logger::Writer::Writer(const char* file_name, size_t max_queue)
+    : max_queue_(max_queue), output_(file_) {
   try {
     file_.open(file_name, std::ios::app);
   } catch (std::ofstream::failure& exception) {
     file_.open(file_name, std::ios::out);
   }
-  output_thread_ = std::thread(&Logger::LogWriter, this);
-}
-Logger::Logger(std::ostream& output, int mode, size_t max_queue)
-    : mode_(mode),
-      max_queue_(max_queue),
-      output_(output) {
-  output_thread_ = std::thread(&Logger::LogWriter, this);
+  worker_thread_ = std::thread(&Writer::Worker, this);
 }
 
-Logger::~Logger() {
+Logger::Writer::Writer(std::ostream& output, size_t max_queue)
+    : max_queue_(max_queue), output_(output) {
+  worker_thread_ = std::thread(&Writer::Worker, this);
+}
+
+Logger::Writer::~Writer() {
   active_ = false;
   output_semaphore_.try_acquire();
   output_semaphore_.release();
 
-  output_thread_.join();
+  worker_thread_.join();
 }
 
-void Logger::LogMessage(const std::string& message, int message_type) {
-  if (message_type > mode_) {
-    return;
-  }
-
+void Logger::Writer::Write(const std::string& message) {
   buffer_mutex_.lock();
   output_list_.push_back(message);
 
@@ -41,7 +36,7 @@ void Logger::LogMessage(const std::string& message, int message_type) {
   buffer_mutex_.unlock();
 }
 
-void Logger::LogWriter() {
+void Logger::Writer::Worker() {
   while (true) {
     output_semaphore_.acquire();
 
@@ -51,8 +46,6 @@ void Logger::LogWriter() {
       if (!contiguous) {
         buffer_mutex_.lock();
         if (output_list_.size() > max_queue_) {
-          output_list_.push_front(GetRawLog(
-              "LOGGER", "LOG WRITER", "Max logger queue reached", Warning));
           contiguous = true;
         }
       }
@@ -75,6 +68,20 @@ void Logger::LogWriter() {
       return;
     }
   }
+}
+
+Logger::Logger(const char* file_name, int mode, size_t max_queue)
+    : mode_(mode), writer_(std::make_shared<Writer>(file_name, max_queue)) {}
+
+Logger::Logger(std::ostream& output, int mode, size_t max_queue)
+    : mode_(mode), writer_(std::make_shared<Writer>(output, max_queue)) {}
+
+void Logger::Log(const std::string& message, int message_type) {
+  if (message_type < mode_) {
+    return;
+  }
+
+  writer_->Write(message);
 }
 
 }  // namespace LGR
