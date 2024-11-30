@@ -21,9 +21,9 @@ enum MessageType {
 class Logger {
  public:
   Logger(const char* file_name, int mode = Info, bool async = true,
-         size_t max_queue = SIZE_T_MAX);
+         size_t max_queue = SIZE_MAX);
   Logger(std::ostream& output, int mode = Info, bool async = true,
-         size_t max_queue = SIZE_T_MAX);
+         size_t max_queue = SIZE_MAX);
 
   Logger(const Logger&) = default;
   Logger(Logger&&) = default;
