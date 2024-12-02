@@ -9,13 +9,13 @@ namespace LGR {
 
 class StandardLogger : protected LGR::Logger {
  public:
-  StandardLogger(const std::string& name, MessageType mode = MessageType::Info,
+  StandardLogger(const std::string& name, int mode = MessageType::Info,
                  bool async = true, char delimiter = '-');
   StandardLogger(const std::string& name, const char* file_name,
-                 MessageType mode = MessageType::Info, bool async = true,
+                 int mode = MessageType::Info, bool async = true,
                  char delimiter = '-', size_t max_queue = SIZE_MAX);
   StandardLogger(const std::string& name, std::ostream& output,
-                 MessageType mode = MessageType::Info, bool async = true,
+                 int mode = MessageType::Info, bool async = true,
                  char delimiter = '-', size_t max_queue = SIZE_MAX);
 
   StandardLogger(const StandardLogger&) = default;
@@ -37,6 +37,8 @@ class StandardLogger : protected LGR::Logger {
                                   bool add_index = false) const;
   virtual StandardLogger GetChild(const std::string& suffix, MessageType mode,
                                   bool add_index = false) const;
+
+  virtual void ChangeMode(int logging_level);
 
  protected:
   std::string name_;

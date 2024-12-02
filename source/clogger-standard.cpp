@@ -38,20 +38,20 @@ std::string MessageTypeToStr(int type) {
   }
 }
 
-StandardLogger::StandardLogger(const std::string& name, LGR::MessageType mode,
-                               bool async, char delimiter)
+StandardLogger::StandardLogger(const std::string& name, int mode, bool async,
+                               char delimiter)
     : StandardLogger(name, std::cerr, mode, async, delimiter) {}
 
 StandardLogger::StandardLogger(const std::string& name, std::ostream& output,
-                               LGR::MessageType mode, bool async,
-                               char delimiter, size_t max_queue)
+                               int mode, bool async, char delimiter,
+                               size_t max_queue)
     : LGR::Logger(output, mode, async, max_queue),
       name_(name),
       delimiter_(delimiter) {}
 
 StandardLogger::StandardLogger(const std::string& name, const char* file_name,
-                               LGR::MessageType mode, bool async,
-                               char delimiter, size_t max_queue)
+                               int mode, bool async, char delimiter,
+                               size_t max_queue)
     : LGR::Logger(file_name, mode, async, max_queue),
       name_(name),
       delimiter_(delimiter) {}
@@ -99,10 +99,12 @@ void StandardLogger::Critical(const std::string& msg) {
   Log(msg, MessageType::Critical);
 }
 
-void StandardLogger::Log(const std::string& msg, LGR::MessageType priority) {
+void StandardLogger::Log(const std::string& msg, MessageType priority) {
   Logger::Log(GetCurrTime() + '\t' + MessageTypeToStr(priority) + '\t' + name_ +
                   " :\t" + msg,
               priority);
 }
+
+void StandardLogger::ChangeMode(int logging_level) { mode_ = logging_level; }
 
 }  // namespace LGR
