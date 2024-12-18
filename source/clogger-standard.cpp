@@ -83,26 +83,31 @@ StandardLogger StandardLogger::GetChild(const std::string& suffix,
   return child;
 }
 
-void StandardLogger::Debug(const std::string& msg) {
-  Log(msg, MessageType::Debug);
+bool StandardLogger::Debug(const std::string& msg) noexcept {
+  return Log(msg, MessageType::Debug);
 }
-void StandardLogger::Info(const std::string& msg) {
-  Log(msg, MessageType::Info);
+bool StandardLogger::Info(const std::string& msg) noexcept {
+  return Log(msg, MessageType::Info);
 }
-void StandardLogger::Warning(const std::string& msg) {
-  Log(msg, MessageType::Warning);
+bool StandardLogger::Warning(const std::string& msg) noexcept {
+  return Log(msg, MessageType::Warning);
 }
-void StandardLogger::Error(const std::string& msg) {
-  Log(msg, MessageType::Error);
+bool StandardLogger::Error(const std::string& msg) noexcept {
+  return Log(msg, MessageType::Error);
 }
-void StandardLogger::Critical(const std::string& msg) {
-  Log(msg, MessageType::Critical);
+bool StandardLogger::Critical(const std::string& msg) noexcept {
+  return Log(msg, MessageType::Critical);
 }
 
-void StandardLogger::Log(const std::string& msg, MessageType priority) {
-  Logger::Log(GetCurrTime() + '\t' + MessageTypeToStr(priority) + '\t' + name_ +
-                  " :\t" + msg,
-              priority);
+bool StandardLogger::Log(const std::string& msg, MessageType priority) noexcept {
+  try {
+    Logger::Log(GetCurrTime() + '\t' + MessageTypeToStr(priority) + '\t' +
+                    name_ + " :\t" + msg,
+                priority);
+    return true;
+  } catch (...) {
+    return false;
+  }
 }
 
 void StandardLogger::ChangeMode(int logging_level) { mode_ = logging_level; }

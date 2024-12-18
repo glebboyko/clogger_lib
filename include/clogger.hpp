@@ -32,7 +32,7 @@ class Logger {
 
   ~Logger() = default;
 
-  virtual void Log(const std::string& message, int message_type);
+  virtual bool Log(const std::string& message, int message_type) noexcept;
 
  private:
   class Writer {
@@ -63,7 +63,7 @@ class Logger {
 
     bool active_ = true;
 
-    void Worker();
+    void Worker() noexcept;
   };
 
  protected:

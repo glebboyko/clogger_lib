@@ -47,36 +47,51 @@ void Logger::Writer::Write(const std::string& message) {
   }
 }
 
-void Logger::Writer::Worker() {
-  while (true) {
-    output_semaphore_.acquire();
+void Logger::Writer::Worker() noexcept {
+  try {
+    while (true) {
+      output_semaphore_.acquire();
 
-    bool contiguous = false;
+      bool contiguous = false;
 
-    while (!output_list_.empty()) {
-      if (!contiguous) {
-        buffer_mutex_.lock();
-        if (output_list_.size() > max_queue_) {
-          contiguous = true;
+      while (!output_list_.empty()) {
+        if (!contiguous) {
+          buffer_mutex_.lock();
+          if (output_list_.size() > max_queue_) {
+            contiguous = true;
+          }
         }
-      }
 
-      std::string message = output_list_.front();
-      output_list_.pop_front();
-      if (!contiguous) {
+        std::string message = output_list_.front();
+        output_list_.pop_front();
+        if (!contiguous) {
+          buffer_mutex_.unlock();
+        }
+        output_ << message << "\n";
+      }
+      output_.flush();
+
+      if (contiguous) {
         buffer_mutex_.unlock();
+        contiguous = false;
       }
-      output_ << message << "\n";
-    }
-    output_.flush();
 
-    if (contiguous) {
-      buffer_mutex_.unlock();
-      contiguous = false;
+      if (!active_) {
+        return;
+      }
     }
-
-    if (!active_) {
-      return;
+  } catch (std::exception& exception) {
+    try {
+      output_ << "caught exception while execution worker: " << exception.what()
+              << "\n";
+      output_.flush();
+    } catch (...) {
+    }
+  } catch (...) {
+    try {
+      output_ << "caught unknown while execution worker\n";
+      output_.flush();
+    } catch (...) {
     }
   }
 }
@@ -89,12 +104,17 @@ Logger::Logger(std::ostream& output, int mode, bool async, size_t max_queue)
     : mode_(mode),
       writer_(std::make_shared<Writer>(output, async, max_queue)) {}
 
-void Logger::Log(const std::string& message, int message_type) {
-  if (message_type < mode_) {
-    return;
-  }
+bool Logger::Log(const std::string& message, int message_type) noexcept {
+  try {
+    if (message_type < mode_) {
+      return false;
+    }
 
-  writer_->Write(message);
+    writer_->Write(message);
+    return true;
+  } catch (...) {
+    return false;
+  }
 }
 
 }  // namespace LGR

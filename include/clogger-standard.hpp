@@ -25,13 +25,13 @@ class StandardLogger : protected LGR::Logger {
 
   ~StandardLogger() = default;
 
-  virtual void Debug(const std::string& msg);
-  virtual void Info(const std::string& msg);
-  virtual void Warning(const std::string& msg);
-  virtual void Error(const std::string& msg);
-  virtual void Critical(const std::string& msg);
+  virtual bool Debug(const std::string& msg) noexcept;
+  virtual bool Info(const std::string& msg) noexcept;
+  virtual bool Warning(const std::string& msg) noexcept;
+  virtual bool Error(const std::string& msg) noexcept;
+  virtual bool Critical(const std::string& msg) noexcept;
 
-  virtual void Log(const std::string& msg, MessageType priority);
+  virtual bool Log(const std::string& msg, MessageType priority) noexcept;
 
   virtual StandardLogger GetChild(const std::string& suffix,
                                   bool add_index = false) const;
