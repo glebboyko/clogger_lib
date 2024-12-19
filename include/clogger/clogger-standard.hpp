@@ -7,7 +7,7 @@
 
 namespace LGR {
 
-class StandardLogger : protected LGR::Logger {
+class StandardLogger : public LGR::Logger {
  public:
   StandardLogger(const std::string& name, int mode = MessageType::Info,
                  bool async = true, char delimiter = '-');
