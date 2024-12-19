@@ -13,6 +13,7 @@ class VarString {
   }
 
   const std::string& GetData() const noexcept;
+  std::string&& GetData() noexcept;
 
  private:
   std::string data_;
