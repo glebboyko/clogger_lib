@@ -8,6 +8,8 @@
 #include <string>
 #include <thread>
 
+#include "clogger/var_string.hpp"
+
 namespace LGR {
 
 enum MessageType {
@@ -25,14 +27,24 @@ class Logger {
   Logger(std::ostream& output, int mode = Info, bool async = true,
          size_t max_queue = SIZE_MAX);
 
-  Logger(const Logger&) = default;
-  Logger(Logger&&) = default;
-  Logger& operator=(const Logger&) = default;
-  Logger& operator=(Logger&&) = default;
+  Logger(const Logger&) noexcept = default;
+  Logger(Logger&&) noexcept = default;
+  Logger& operator=(const Logger&) noexcept = default;
+  Logger& operator=(Logger&&) noexcept = default;
 
   ~Logger() = default;
 
   virtual bool Log(const std::string& message, int message_type) noexcept;
+  bool Log(const VarString& var_string, int message_type) noexcept;
+
+  template <typename... Args>
+  bool Log(int message_type, const Args&... args) noexcept {
+    try {
+      return Log(VarString(args...), message_type);
+    } catch (...) {
+      return false;
+    }
+  }
 
  private:
   class Writer {

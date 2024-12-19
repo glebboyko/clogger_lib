@@ -9,6 +9,6 @@ include_directories(include source)
 
 add_library(${PROJECT_NAME}
         STATIC
-        source/clogger.cpp source/clogger-standard.cpp)
+        source/clogger.cpp source/clogger-standard.cpp source/var_string.cpp)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "lib_")

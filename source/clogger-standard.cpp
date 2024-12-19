@@ -1,4 +1,4 @@
-#include "clogger-standard.hpp"
+#include "clogger/clogger-standard.hpp"
 
 #include <chrono>
 #include <iostream>
@@ -83,23 +83,7 @@ StandardLogger StandardLogger::GetChild(const std::string& suffix,
   return child;
 }
 
-bool StandardLogger::Debug(const std::string& msg) noexcept {
-  return Log(msg, MessageType::Debug);
-}
-bool StandardLogger::Info(const std::string& msg) noexcept {
-  return Log(msg, MessageType::Info);
-}
-bool StandardLogger::Warning(const std::string& msg) noexcept {
-  return Log(msg, MessageType::Warning);
-}
-bool StandardLogger::Error(const std::string& msg) noexcept {
-  return Log(msg, MessageType::Error);
-}
-bool StandardLogger::Critical(const std::string& msg) noexcept {
-  return Log(msg, MessageType::Critical);
-}
-
-bool StandardLogger::Log(const std::string& msg, MessageType priority) noexcept {
+bool StandardLogger::Log(const std::string& msg, int priority) noexcept {
   try {
     Logger::Log(GetCurrTime() + '\t' + MessageTypeToStr(priority) + '\t' +
                     name_ + " :\t" + msg,

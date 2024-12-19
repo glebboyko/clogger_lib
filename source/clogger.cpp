@@ -1,6 +1,6 @@
-#include "clogger.hpp"
+#include "clogger/clogger.hpp"
 
-#include "clogger-standard.hpp"
+#include "clogger/clogger-standard.hpp"
 
 namespace LGR {
 
@@ -115,6 +115,10 @@ bool Logger::Log(const std::string& message, int message_type) noexcept {
   } catch (...) {
     return false;
   }
+}
+
+bool Logger::Log(const LGR::VarString& var_string, int message_type) noexcept {
+  return Log(var_string.GetData(), message_type);
 }
 
 }  // namespace LGR

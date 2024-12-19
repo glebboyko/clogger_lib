@@ -25,13 +25,28 @@ class StandardLogger : protected LGR::Logger {
 
   ~StandardLogger() = default;
 
-  virtual bool Debug(const std::string& msg) noexcept;
-  virtual bool Info(const std::string& msg) noexcept;
-  virtual bool Warning(const std::string& msg) noexcept;
-  virtual bool Error(const std::string& msg) noexcept;
-  virtual bool Critical(const std::string& msg) noexcept;
+  template <typename... Args>
+  bool Debug(const Args&... args) noexcept {
+    return Logger::Log(MessageType::Debug, args...);
+  }
+  template <typename... Args>
+  bool Info(const Args&... args) noexcept {
+    return Logger::Log(MessageType::Info, args...);
+  }
+  template <typename... Args>
+  bool Warning(const Args&... args) noexcept {
+    return Logger::Log(MessageType::Warning, args...);
+  }
+  template <typename... Args>
+  bool Error(const Args&... args) noexcept {
+    return Logger::Log(MessageType::Error, args...);
+  }
+  template <typename... Args>
+  bool Critical(const Args&... args) noexcept {
+    return Logger::Log(MessageType::Critical, args...);
+  }
 
-  virtual bool Log(const std::string& msg, MessageType priority) noexcept;
+  virtual bool Log(const std::string& msg, int priority) noexcept override;
 
   virtual StandardLogger GetChild(const std::string& suffix,
                                   bool add_index = false) const;
